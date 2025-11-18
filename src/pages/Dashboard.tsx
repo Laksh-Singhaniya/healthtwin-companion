@@ -1,0 +1,251 @@
+import { useEffect, useState } from "react";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { HealthCard } from "@/components/HealthCard";
+import { HealthProfileForm } from "@/components/HealthProfileForm";
+import { Loader2, LogOut, Plus, Heart, Activity, Calendar, FileText } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+
+const Dashboard = () => {
+  const { user, signOut } = useAuth();
+  const [loading, setLoading] = useState(true);
+  const [showForm, setShowForm] = useState(false);
+  const [healthProfile, setHealthProfile] = useState<any>(null);
+  const [emergencyContact, setEmergencyContact] = useState<any>(null);
+  const [allergies, setAllergies] = useState<any[]>([]);
+  const [medications, setMedications] = useState<any[]>([]);
+  const { toast } = useToast();
+
+  const fetchHealthData = async () => {
+    if (!user) return;
+
+    try {
+      setLoading(true);
+
+      // Fetch health profile
+      const { data: profile, error: profileError } = await supabase
+        .from("health_profiles")
+        .select("*")
+        .eq("user_id", user.id)
+        .single();
+
+      if (profileError && profileError.code !== "PGRST116") throw profileError;
+      setHealthProfile(profile);
+
+      // Fetch emergency contact
+      const { data: contacts } = await supabase
+        .from("emergency_contacts")
+        .select("*")
+        .eq("user_id", user.id)
+        .eq("is_primary", true)
+        .single();
+
+      setEmergencyContact(contacts);
+
+      // Fetch allergies
+      const { data: allergyData } = await supabase
+        .from("allergies")
+        .select("*")
+        .eq("user_id", user.id);
+
+      setAllergies(allergyData || []);
+
+      // Fetch medications
+      const { data: medData } = await supabase
+        .from("medications")
+        .select("*")
+        .eq("user_id", user.id)
+        .is("end_date", null);
+
+      setMedications(medData || []);
+    } catch (error: any) {
+      toast({
+        title: "Error loading health data",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchHealthData();
+  }, [user]);
+
+  const isProfileComplete = () => {
+    return healthProfile?.blood_type && healthProfile?.date_of_birth && emergencyContact;
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-accent/5">
+      {/* Header */}
+      <header className="bg-card border-b border-border shadow-sm">
+        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-gradient-to-br from-primary to-primary-light rounded-xl">
+              <Heart className="w-6 h-6 text-primary-foreground" />
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold text-foreground">Health Twin</h1>
+              <p className="text-sm text-muted-foreground">{user?.email}</p>
+            </div>
+          </div>
+          <Button onClick={signOut} variant="outline" size="sm">
+            <LogOut className="w-4 h-4 mr-2" />
+            Sign Out
+          </Button>
+        </div>
+      </header>
+
+      <main className="container mx-auto px-4 py-8">
+        {!isProfileComplete() && !showForm && (
+          <Card className="mb-8 border-primary/20 bg-gradient-to-r from-primary/5 to-accent/5">
+            <CardHeader>
+              <CardTitle>Complete Your Health Profile</CardTitle>
+              <CardDescription>
+                Add your health information to unlock all features and create your digital health card
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button onClick={() => setShowForm(true)} className="w-full sm:w-auto">
+                <Plus className="w-4 h-4 mr-2" />
+                Complete Profile
+              </Button>
+            </CardContent>
+          </Card>
+        )}
+
+        {showForm && (
+          <div className="mb-8">
+            <HealthProfileForm
+              userId={user!.id}
+              onComplete={() => {
+                setShowForm(false);
+                fetchHealthData();
+              }}
+            />
+          </div>
+        )}
+
+        {isProfileComplete() && !showForm && (
+          <div className="space-y-8">
+            {/* Quick Stats */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <Card>
+                <CardContent className="pt-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-muted-foreground">Health ID</p>
+                      <p className="text-2xl font-bold text-foreground">{healthProfile?.health_id?.slice(0, 4)}...</p>
+                    </div>
+                    <FileText className="w-8 h-8 text-primary" />
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardContent className="pt-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-muted-foreground">Blood Type</p>
+                      <p className="text-2xl font-bold text-foreground">{healthProfile?.blood_type || "N/A"}</p>
+                    </div>
+                    <Activity className="w-8 h-8 text-destructive" />
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardContent className="pt-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-muted-foreground">Allergies</p>
+                      <p className="text-2xl font-bold text-foreground">{allergies.length}</p>
+                    </div>
+                    <Activity className="w-8 h-8 text-warning" />
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardContent className="pt-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-muted-foreground">Medications</p>
+                      <p className="text-2xl font-bold text-foreground">{medications.length}</p>
+                    </div>
+                    <Calendar className="w-8 h-8 text-accent" />
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Health Card */}
+            <div>
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-2xl font-bold text-foreground">Your Digital Health Card</h2>
+                <Button onClick={() => setShowForm(true)} variant="outline" size="sm">
+                  <Plus className="w-4 h-4 mr-2" />
+                  Update Info
+                </Button>
+              </div>
+              <HealthCard
+                healthProfile={healthProfile}
+                emergencyContact={emergencyContact}
+                allergies={allergies}
+                medications={medications}
+                userName={user?.email?.split("@")[0]}
+              />
+            </div>
+
+            {/* Coming Soon Features */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <Card className="border-dashed">
+                <CardHeader>
+                  <CardTitle className="text-lg">Health Monitoring</CardTitle>
+                  <CardDescription>Track vitals and health metrics</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-muted-foreground">Coming in Phase 2</p>
+                </CardContent>
+              </Card>
+
+              <Card className="border-dashed">
+                <CardHeader>
+                  <CardTitle className="text-lg">Women's Health</CardTitle>
+                  <CardDescription>Cycle tracking and pregnancy monitoring</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-muted-foreground">Coming in Phase 3</p>
+                </CardContent>
+              </Card>
+
+              <Card className="border-dashed">
+                <CardHeader>
+                  <CardTitle className="text-lg">AI Health Assistant</CardTitle>
+                  <CardDescription>24/7 symptom checking and health advice</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-muted-foreground">Coming in Phase 4</p>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        )}
+      </main>
+    </div>
+  );
+};
+
+export default Dashboard;
