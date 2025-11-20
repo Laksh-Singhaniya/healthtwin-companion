@@ -5,7 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { HealthCard } from "@/components/HealthCard";
 import { HealthProfileForm } from "@/components/HealthProfileForm";
-import { Loader2, LogOut, Plus, Heart, Activity, Calendar, FileText } from "lucide-react";
+import { NavLink } from "@/components/NavLink";
+import { Loader2, LogOut, Plus, Heart, Activity, Calendar, FileText, TrendingUp } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 const Dashboard = () => {
@@ -91,20 +92,32 @@ const Dashboard = () => {
     <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-accent/5">
       {/* Header */}
       <header className="bg-card border-b border-border shadow-sm">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-gradient-to-br from-primary to-primary-light rounded-xl">
-              <Heart className="w-6 h-6 text-primary-foreground" />
+        <div className="container mx-auto px-4 py-4">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-gradient-to-br from-primary to-primary-light rounded-xl">
+                <Heart className="w-6 h-6 text-primary-foreground" />
+              </div>
+              <div>
+                <h1 className="text-2xl font-bold text-foreground">Health Twin</h1>
+                <p className="text-sm text-muted-foreground">{user?.email}</p>
+              </div>
             </div>
-            <div>
-              <h1 className="text-2xl font-bold text-foreground">Health Twin</h1>
-              <p className="text-sm text-muted-foreground">{user?.email}</p>
-            </div>
+            <Button onClick={signOut} variant="outline" size="sm">
+              <LogOut className="w-4 h-4 mr-2" />
+              Sign Out
+            </Button>
           </div>
-          <Button onClick={signOut} variant="outline" size="sm">
-            <LogOut className="w-4 h-4 mr-2" />
-            Sign Out
-          </Button>
+          
+          {/* Navigation */}
+          <nav className="flex items-center gap-2">
+            <NavLink to="/" icon={<Activity className="h-4 w-4" />}>
+              Dashboard
+            </NavLink>
+            <NavLink to="/health-monitoring" icon={<TrendingUp className="h-4 w-4" />}>
+              Health Monitoring
+            </NavLink>
+          </nav>
         </div>
       </header>
 
