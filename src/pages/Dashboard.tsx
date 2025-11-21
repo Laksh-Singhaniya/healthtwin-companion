@@ -110,12 +110,21 @@ const Dashboard = () => {
           </div>
           
           {/* Navigation */}
-          <nav className="flex items-center gap-2">
+          <nav className="flex items-center gap-2 overflow-x-auto">
             <NavLink to="/" icon={<Activity className="h-4 w-4" />}>
               Dashboard
             </NavLink>
             <NavLink to="/health-monitoring" icon={<TrendingUp className="h-4 w-4" />}>
-              Health Monitoring
+              Vitals
+            </NavLink>
+            <NavLink to="/womens-health" icon={<Heart className="h-4 w-4" />}>
+              Women's Health
+            </NavLink>
+            <NavLink to="/medications-allergies" icon={<FileText className="h-4 w-4" />}>
+              Medications
+            </NavLink>
+            <NavLink to="/emergency-contacts" icon={<Calendar className="h-4 w-4" />}>
+              Emergency
             </NavLink>
           </nav>
         </div>
@@ -222,35 +231,47 @@ const Dashboard = () => {
               />
             </div>
 
-            {/* Coming Soon Features */}
+            {/* Active Features */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <Card className="border-dashed">
+              <Card>
                 <CardHeader>
                   <CardTitle className="text-lg">Health Monitoring</CardTitle>
                   <CardDescription>Track vitals and health metrics</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-sm text-muted-foreground">Coming in Phase 2</p>
+                  <NavLink to="/health-monitoring">
+                    <Button variant="outline" className="w-full">
+                      Open Vitals Tracking
+                    </Button>
+                  </NavLink>
                 </CardContent>
               </Card>
 
-              <Card className="border-dashed">
+              <Card>
                 <CardHeader>
                   <CardTitle className="text-lg">Women's Health</CardTitle>
                   <CardDescription>Cycle tracking and pregnancy monitoring</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-sm text-muted-foreground">Coming in Phase 3</p>
+                  <NavLink to="/womens-health">
+                    <Button variant="outline" className="w-full">
+                      Manage Women's Health
+                    </Button>
+                  </NavLink>
                 </CardContent>
               </Card>
 
-              <Card className="border-dashed">
+              <Card>
                 <CardHeader>
-                  <CardTitle className="text-lg">AI Health Assistant</CardTitle>
-                  <CardDescription>24/7 symptom checking and health advice</CardDescription>
+                  <CardTitle className="text-lg">Medications & Allergies</CardTitle>
+                  <CardDescription>Track medications and manage allergies</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-sm text-muted-foreground">Coming in Phase 4</p>
+                  <NavLink to="/medications-allergies">
+                    <Button variant="outline" className="w-full">
+                      Manage Medications
+                    </Button>
+                  </NavLink>
                 </CardContent>
               </Card>
             </div>

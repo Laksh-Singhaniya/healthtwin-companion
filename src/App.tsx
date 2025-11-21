@@ -7,6 +7,9 @@ import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
 import HealthMonitoring from "./pages/HealthMonitoring";
+import WomensHealth from "./pages/WomensHealth";
+import MedicationsAllergies from "./pages/MedicationsAllergies";
+import EmergencyContacts from "./pages/EmergencyContacts";
 import NotFound from "./pages/NotFound";
 import { Loader2 } from "lucide-react";
 
@@ -69,6 +72,30 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <HealthMonitoring />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/womens-health"
+              element={
+                <ProtectedRoute>
+                  <WomensHealth />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/medications-allergies"
+              element={
+                <ProtectedRoute>
+                  <MedicationsAllergies />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/emergency-contacts"
+              element={
+                <ProtectedRoute>
+                  <EmergencyContacts />
                 </ProtectedRoute>
               }
             />

@@ -155,6 +155,102 @@ export type Database = {
         }
         Relationships: []
       }
+      menstrual_cycles: {
+        Row: {
+          created_at: string
+          cycle_end_date: string | null
+          cycle_length: number | null
+          cycle_start_date: string
+          flow_intensity: string | null
+          id: string
+          mood: string | null
+          notes: string | null
+          period_end_date: string | null
+          period_length: number | null
+          period_start_date: string
+          symptoms: string[] | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          cycle_end_date?: string | null
+          cycle_length?: number | null
+          cycle_start_date: string
+          flow_intensity?: string | null
+          id?: string
+          mood?: string | null
+          notes?: string | null
+          period_end_date?: string | null
+          period_length?: number | null
+          period_start_date: string
+          symptoms?: string[] | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          cycle_end_date?: string | null
+          cycle_length?: number | null
+          cycle_start_date?: string
+          flow_intensity?: string | null
+          id?: string
+          mood?: string | null
+          notes?: string | null
+          period_end_date?: string | null
+          period_length?: number | null
+          period_start_date?: string
+          symptoms?: string[] | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      pregnancy_tracking: {
+        Row: {
+          appointments_dates: string[] | null
+          conception_date: string | null
+          created_at: string
+          current_week: number | null
+          due_date: string
+          id: string
+          notes: string | null
+          status: string | null
+          symptoms: string[] | null
+          updated_at: string
+          user_id: string
+          weight_gain: number | null
+        }
+        Insert: {
+          appointments_dates?: string[] | null
+          conception_date?: string | null
+          created_at?: string
+          current_week?: number | null
+          due_date: string
+          id?: string
+          notes?: string | null
+          status?: string | null
+          symptoms?: string[] | null
+          updated_at?: string
+          user_id: string
+          weight_gain?: number | null
+        }
+        Update: {
+          appointments_dates?: string[] | null
+          conception_date?: string | null
+          created_at?: string
+          current_week?: number | null
+          due_date?: string
+          id?: string
+          notes?: string | null
+          status?: string | null
+          symptoms?: string[] | null
+          updated_at?: string
+          user_id?: string
+          weight_gain?: number | null
+        }
+        Relationships: []
+      }
       vital_signs: {
         Row: {
           blood_glucose: number | null
