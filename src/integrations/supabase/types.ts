@@ -44,6 +44,63 @@ export type Database = {
         }
         Relationships: []
       }
+      chat_messages: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          role: string
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          role: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          role?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      doctors: {
+        Row: {
+          created_at: string
+          email: string | null
+          full_name: string
+          id: string
+          license_number: string | null
+          phone: string | null
+          specialization: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          email?: string | null
+          full_name: string
+          id?: string
+          license_number?: string | null
+          phone?: string | null
+          specialization?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          email?: string | null
+          full_name?: string
+          id?: string
+          license_number?: string | null
+          phone?: string | null
+          specialization?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       emergency_contacts: {
         Row: {
           created_at: string | null
@@ -203,6 +260,33 @@ export type Database = {
           symptoms?: string[] | null
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      patient_doctor_access: {
+        Row: {
+          doctor_id: string
+          expires_at: string | null
+          granted_at: string
+          id: string
+          patient_id: string
+          status: string
+        }
+        Insert: {
+          doctor_id: string
+          expires_at?: string | null
+          granted_at?: string
+          id?: string
+          patient_id: string
+          status?: string
+        }
+        Update: {
+          doctor_id?: string
+          expires_at?: string | null
+          granted_at?: string
+          id?: string
+          patient_id?: string
+          status?: string
         }
         Relationships: []
       }

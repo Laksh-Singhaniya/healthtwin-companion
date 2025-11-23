@@ -10,6 +10,8 @@ import HealthMonitoring from "./pages/HealthMonitoring";
 import WomensHealth from "./pages/WomensHealth";
 import MedicationsAllergies from "./pages/MedicationsAllergies";
 import EmergencyContacts from "./pages/EmergencyContacts";
+import HealthChat from "./pages/HealthChat";
+import DoctorDashboard from "./pages/DoctorDashboard";
 import NotFound from "./pages/NotFound";
 import { Loader2 } from "lucide-react";
 
@@ -96,6 +98,22 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <EmergencyContacts />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/health-chat"
+              element={
+                <ProtectedRoute>
+                  <HealthChat />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/doctor-dashboard"
+              element={
+                <ProtectedRoute>
+                  <DoctorDashboard />
                 </ProtectedRoute>
               }
             />
