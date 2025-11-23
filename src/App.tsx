@@ -12,6 +12,7 @@ import MedicationsAllergies from "./pages/MedicationsAllergies";
 import EmergencyContacts from "./pages/EmergencyContacts";
 import HealthChat from "./pages/HealthChat";
 import DoctorDashboard from "./pages/DoctorDashboard";
+import HealthPredictions from "./pages/HealthPredictions";
 import NotFound from "./pages/NotFound";
 import { Loader2 } from "lucide-react";
 
@@ -114,6 +115,14 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <DoctorDashboard />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/health-predictions"
+              element={
+                <ProtectedRoute>
+                  <HealthPredictions />
                 </ProtectedRoute>
               }
             />
