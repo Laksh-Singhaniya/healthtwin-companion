@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { HealthCard } from "@/components/HealthCard";
 import { HealthProfileForm } from "@/components/HealthProfileForm";
 import { NavLink } from "@/components/NavLink";
-import { Loader2, LogOut, Plus, Heart, Activity, Calendar, FileText, TrendingUp, MessageSquare, Stethoscope } from "lucide-react";
+import { Loader2, LogOut, Plus, Heart, Activity, Calendar, FileText, TrendingUp, MessageSquare, Stethoscope, Brain } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 const Dashboard = () => {
@@ -131,6 +131,9 @@ const Dashboard = () => {
             </NavLink>
             <NavLink to="/doctor-dashboard" icon={<Stethoscope className="h-4 w-4" />}>
               Doctor
+            </NavLink>
+            <NavLink to="/health-predictions" icon={<Brain className="h-4 w-4" />}>
+              Predictions
             </NavLink>
           </nav>
         </div>
