@@ -5,52 +5,35 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import Auth from "./pages/Auth";
-import Dashboard from "./pages/Dashboard";
+import Landing from "./pages/Landing";
+import PatientDashboard from "./pages/patient/Dashboard";
 import HealthMonitoring from "./pages/HealthMonitoring";
-import WomensHealth from "./pages/WomensHealth";
+import HealthPredictions from "./pages/HealthPredictions";
 import MedicationsAllergies from "./pages/MedicationsAllergies";
 import EmergencyContacts from "./pages/EmergencyContacts";
+import WomensHealth from "./pages/WomensHealth";
 import HealthChat from "./pages/HealthChat";
-import DoctorDashboard from "./pages/DoctorDashboard";
-import HealthPredictions from "./pages/HealthPredictions";
+import DoctorDashboard from "./pages/doctor/Dashboard";
+import PatientAppointments from "./pages/patient/Appointments";
+import PatientMessages from "./pages/patient/Messages";
+import DoctorAppointments from "./pages/doctor/Appointments";
+import DoctorMessages from "./pages/doctor/Messages";
+import PatientManagement from "./pages/doctor/PatientManagement";
+import DoctorProfile from "./pages/doctor/Profile";
+import { RoleProtectedRoute } from "./components/RoleProtectedRoute";
 import NotFound from "./pages/NotFound";
 import { Loader2 } from "lucide-react";
 
 const queryClient = new QueryClient();
 
-const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  const { user, loading } = useAuth();
-
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <Loader2 className="w-8 h-8 animate-spin text-primary" />
-      </div>
-    );
-  }
-
-  if (!user) {
-    return <Navigate to="/auth" replace />;
-  }
-
-  return <>{children}</>;
-};
-
 const PublicRoute = ({ children }: { children: React.ReactNode }) => {
-  const { user, loading } = useAuth();
-
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <Loader2 className="w-8 h-8 animate-spin text-primary" />
-      </div>
-    );
-  }
-
+  const { user, loading, userRole } = useAuth();
+  if (loading) return <div className="flex items-center justify-center min-h-screen"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>;
   if (user) {
+    if (userRole === "doctor") return <Navigate to="/doctor-portal" replace />;
+    else if (userRole === "patient") return <Navigate to="/patient-dashboard" replace />;
     return <Navigate to="/" replace />;
   }
-
   return <>{children}</>;
 };
 
@@ -62,79 +45,22 @@ const App = () => (
       <BrowserRouter>
         <AuthProvider>
           <Routes>
-            <Route
-              path="/"
-              element={
-                <ProtectedRoute>
-                  <Dashboard />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/health-monitoring"
-              element={
-                <ProtectedRoute>
-                  <HealthMonitoring />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/womens-health"
-              element={
-                <ProtectedRoute>
-                  <WomensHealth />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/medications-allergies"
-              element={
-                <ProtectedRoute>
-                  <MedicationsAllergies />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/emergency-contacts"
-              element={
-                <ProtectedRoute>
-                  <EmergencyContacts />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/health-chat"
-              element={
-                <ProtectedRoute>
-                  <HealthChat />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/doctor-dashboard"
-              element={
-                <ProtectedRoute>
-                  <DoctorDashboard />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/health-predictions"
-              element={
-                <ProtectedRoute>
-                  <HealthPredictions />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/auth"
-              element={
-                <PublicRoute>
-                  <Auth />
-                </PublicRoute>
-              }
-            />
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+            <Route path="/" element={<Landing />} />
+            <Route path="/auth" element={<PublicRoute><Auth /></PublicRoute>} />
+            <Route path="/patient-dashboard" element={<RoleProtectedRoute allowedRoles={["patient"]}><PatientDashboard /></RoleProtectedRoute>} />
+            <Route path="/health-monitoring" element={<RoleProtectedRoute allowedRoles={["patient"]}><HealthMonitoring /></RoleProtectedRoute>} />
+            <Route path="/health-predictions" element={<RoleProtectedRoute allowedRoles={["patient"]}><HealthPredictions /></RoleProtectedRoute>} />
+            <Route path="/medications" element={<RoleProtectedRoute allowedRoles={["patient"]}><MedicationsAllergies /></RoleProtectedRoute>} />
+            <Route path="/emergency-contacts" element={<RoleProtectedRoute allowedRoles={["patient"]}><EmergencyContacts /></RoleProtectedRoute>} />
+            <Route path="/womens-health" element={<RoleProtectedRoute allowedRoles={["patient"]}><WomensHealth /></RoleProtectedRoute>} />
+            <Route path="/health-chat" element={<RoleProtectedRoute allowedRoles={["patient"]}><HealthChat /></RoleProtectedRoute>} />
+            <Route path="/patient/appointments" element={<RoleProtectedRoute allowedRoles={["patient"]}><PatientAppointments /></RoleProtectedRoute>} />
+            <Route path="/patient/messages" element={<RoleProtectedRoute allowedRoles={["patient"]}><PatientMessages /></RoleProtectedRoute>} />
+            <Route path="/doctor-portal" element={<RoleProtectedRoute allowedRoles={["doctor"]}><DoctorDashboard /></RoleProtectedRoute>} />
+            <Route path="/doctor/patients" element={<RoleProtectedRoute allowedRoles={["doctor"]}><PatientManagement /></RoleProtectedRoute>} />
+            <Route path="/doctor/appointments" element={<RoleProtectedRoute allowedRoles={["doctor"]}><DoctorAppointments /></RoleProtectedRoute>} />
+            <Route path="/doctor/messages" element={<RoleProtectedRoute allowedRoles={["doctor"]}><DoctorMessages /></RoleProtectedRoute>} />
+            <Route path="/doctor/profile" element={<RoleProtectedRoute allowedRoles={["doctor"]}><DoctorProfile /></RoleProtectedRoute>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </AuthProvider>

@@ -44,6 +44,59 @@ export type Database = {
         }
         Relationships: []
       }
+      appointments: {
+        Row: {
+          created_at: string | null
+          doctor_id: string
+          duration: number | null
+          id: string
+          notes: string | null
+          patient_id: string
+          prescription: string | null
+          reason: string | null
+          scheduled_time: string
+          status: string | null
+          type: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          doctor_id: string
+          duration?: number | null
+          id?: string
+          notes?: string | null
+          patient_id: string
+          prescription?: string | null
+          reason?: string | null
+          scheduled_time: string
+          status?: string | null
+          type?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          doctor_id?: string
+          duration?: number | null
+          id?: string
+          notes?: string | null
+          patient_id?: string
+          prescription?: string | null
+          reason?: string | null
+          scheduled_time?: string
+          status?: string | null
+          type?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "appointments_doctor_id_fkey"
+            columns: ["doctor_id"]
+            isOneToOne: false
+            referencedRelation: "doctors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       chat_messages: {
         Row: {
           content: string
@@ -70,34 +123,52 @@ export type Database = {
       }
       doctors: {
         Row: {
+          bio: string | null
+          clinic_address: string | null
+          clinic_name: string | null
+          consultation_fee: number | null
           created_at: string
           email: string | null
           full_name: string
           id: string
           license_number: string | null
           phone: string | null
+          rating: number | null
           specialization: string | null
           user_id: string
+          years_experience: number | null
         }
         Insert: {
+          bio?: string | null
+          clinic_address?: string | null
+          clinic_name?: string | null
+          consultation_fee?: number | null
           created_at?: string
           email?: string | null
           full_name: string
           id?: string
           license_number?: string | null
           phone?: string | null
+          rating?: number | null
           specialization?: string | null
           user_id: string
+          years_experience?: number | null
         }
         Update: {
+          bio?: string | null
+          clinic_address?: string | null
+          clinic_name?: string | null
+          consultation_fee?: number | null
           created_at?: string
           email?: string | null
           full_name?: string
           id?: string
           license_number?: string | null
           phone?: string | null
+          rating?: number | null
           specialization?: string | null
           user_id?: string
+          years_experience?: number | null
         }
         Relationships: []
       }
@@ -263,6 +334,33 @@ export type Database = {
         }
         Relationships: []
       }
+      messages: {
+        Row: {
+          content: string
+          created_at: string | null
+          id: string
+          is_read: boolean | null
+          receiver_id: string
+          sender_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string | null
+          id?: string
+          is_read?: boolean | null
+          receiver_id: string
+          sender_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string | null
+          id?: string
+          is_read?: boolean | null
+          receiver_id?: string
+          sender_id?: string
+        }
+        Relationships: []
+      }
       patient_doctor_access: {
         Row: {
           doctor_id: string
@@ -335,6 +433,27 @@ export type Database = {
         }
         Relationships: []
       }
+      user_roles: {
+        Row: {
+          created_at: string | null
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
       vital_signs: {
         Row: {
           blood_glucose: number | null
@@ -386,9 +505,16 @@ export type Database = {
     }
     Functions: {
       generate_health_id: { Args: never; Returns: string }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "patient" | "doctor" | "admin"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -515,6 +641,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["patient", "doctor", "admin"],
+    },
   },
 } as const

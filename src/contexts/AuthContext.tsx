@@ -3,11 +3,14 @@ import { User, Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 
+type UserRole = "patient" | "doctor" | "admin" | null;
+
 interface AuthContextType {
   user: User | null;
   session: Session | null;
   loading: boolean;
-  signUp: (email: string, password: string) => Promise<{ error: any }>;
+  userRole: UserRole;
+  signUp: (email: string, password: string, role: "patient" | "doctor", metadata?: any) => Promise<{ error: any }>;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
   signOut: () => Promise<void>;
 }
@@ -18,7 +21,19 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
+  const [userRole, setUserRole] = useState<UserRole>(null);
   const navigate = useNavigate();
+
+  const getUserRole = async (userId: string): Promise<UserRole> => {
+    const { data, error } = await supabase
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", userId)
+      .single();
+    
+    if (error || !data) return null;
+    return data.role as UserRole;
+  };
 
   useEffect(() => {
     // Set up auth state listener
@@ -26,6 +41,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       (event, session) => {
         setSession(session);
         setUser(session?.user ?? null);
+        
+        if (session?.user) {
+          setTimeout(() => {
+            getUserRole(session.user.id).then(setUserRole);
+          }, 0);
+        } else {
+          setUserRole(null);
+        }
         setLoading(false);
       }
     );
@@ -34,38 +57,70 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
+      
+      if (session?.user) {
+        getUserRole(session.user.id).then(setUserRole);
+      }
       setLoading(false);
     });
 
     return () => subscription.unsubscribe();
   }, []);
 
-  const signUp = async (email: string, password: string) => {
+  const signUp = async (email: string, password: string, role: "patient" | "doctor", metadata?: any) => {
     const redirectUrl = `${window.location.origin}/`;
     
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
-        emailRedirectTo: redirectUrl
+        emailRedirectTo: redirectUrl,
+        data: metadata
       }
     });
     
-    if (!error) {
-      navigate("/");
+    if (!error && data.user) {
+      // Insert role into user_roles table
+      const { error: roleError } = await supabase
+        .from("user_roles")
+        .insert({ user_id: data.user.id, role });
+      
+      if (roleError) {
+        console.error("Error assigning role:", roleError);
+        return { error: roleError };
+      }
+      
+      setUserRole(role);
+      
+      // Redirect based on role
+      if (role === "patient") {
+        navigate("/patient-dashboard");
+      } else {
+        navigate("/doctor-portal");
+      }
     }
     
     return { error };
   };
 
   const signIn = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({
+    const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
     
-    if (!error) {
-      navigate("/");
+    if (!error && data.user) {
+      const role = await getUserRole(data.user.id);
+      setUserRole(role);
+      
+      // Redirect based on role
+      if (role === "patient") {
+        navigate("/patient-dashboard");
+      } else if (role === "doctor") {
+        navigate("/doctor-portal");
+      } else {
+        navigate("/");
+      }
     }
     
     return { error };
@@ -77,7 +132,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, session, loading, signUp, signIn, signOut }}>
+    <AuthContext.Provider value={{ user, session, loading, userRole, signUp, signIn, signOut }}>
       {children}
     </AuthContext.Provider>
   );
