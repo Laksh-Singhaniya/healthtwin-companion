@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { PatientLayout } from "@/components/layouts/PatientLayout";
 import { VitalSignsForm } from "@/components/VitalSignsForm";
 import { HealthCharts } from "@/components/HealthCharts";
 import { Button } from "@/components/ui/button";
@@ -73,7 +74,7 @@ export default function HealthMonitoring() {
   const latestVitals = vitalSigns[0];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5">
+    <PatientLayout>
       <div className="container mx-auto px-4 py-8 space-y-6">
         {/* Header */}
         <div className="space-y-2">
@@ -211,6 +212,6 @@ export default function HealthMonitoring() {
           </TabsContent>
         </Tabs>
       </div>
-    </div>
+    </PatientLayout>
   );
 }

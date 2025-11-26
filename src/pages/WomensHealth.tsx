@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
+import { PatientLayout } from "@/components/layouts/PatientLayout";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,7 +11,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/hooks/use-toast";
 import { Calendar, Heart, Plus, Trash2 } from "lucide-react";
 import { format } from "date-fns";
-import { NavLink } from "@/components/NavLink";
 
 type MenstrualCycle = {
   id: string;
@@ -161,20 +161,12 @@ export default function WomensHealth() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <nav className="border-b border-border bg-card">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <h1 className="text-2xl font-bold text-foreground">Women's Health</h1>
-            <div className="flex gap-4">
-              <NavLink to="/">Dashboard</NavLink>
-              <NavLink to="/health-monitoring">Vitals</NavLink>
-            </div>
-          </div>
+    <PatientLayout>
+      <div className="container mx-auto px-4 py-8 space-y-8">
+        <div>
+          <h1 className="text-3xl font-bold mb-2">Women's Health</h1>
+          <p className="text-muted-foreground">Track your menstrual cycles and pregnancy journey</p>
         </div>
-      </nav>
-
-      <main className="container mx-auto px-4 py-8 space-y-8">
         {/* Menstrual Cycle Tracking */}
         <Card>
           <CardHeader>
@@ -392,7 +384,7 @@ export default function WomensHealth() {
             )}
           </CardContent>
         </Card>
-      </main>
-    </div>
+      </div>
+    </PatientLayout>
   );
 }
