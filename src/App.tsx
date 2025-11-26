@@ -20,6 +20,7 @@ import DoctorAppointments from "./pages/doctor/Appointments";
 import DoctorMessages from "./pages/doctor/Messages";
 import PatientManagement from "./pages/doctor/PatientManagement";
 import DoctorProfile from "./pages/doctor/Profile";
+import HealthCard from "./pages/HealthCard";
 import { RoleProtectedRoute } from "./components/RoleProtectedRoute";
 import NotFound from "./pages/NotFound";
 import { Loader2 } from "lucide-react";
@@ -48,6 +49,7 @@ const App = () => (
             <Route path="/" element={<Landing />} />
             <Route path="/auth" element={<PublicRoute><Auth /></PublicRoute>} />
             <Route path="/patient-dashboard" element={<RoleProtectedRoute allowedRoles={["patient"]}><PatientDashboard /></RoleProtectedRoute>} />
+            <Route path="/health-card" element={<RoleProtectedRoute allowedRoles={["patient"]}><HealthCard /></RoleProtectedRoute>} />
             <Route path="/health-monitoring" element={<RoleProtectedRoute allowedRoles={["patient"]}><HealthMonitoring /></RoleProtectedRoute>} />
             <Route path="/health-predictions" element={<RoleProtectedRoute allowedRoles={["patient"]}><HealthPredictions /></RoleProtectedRoute>} />
             <Route path="/medications" element={<RoleProtectedRoute allowedRoles={["patient"]}><MedicationsAllergies /></RoleProtectedRoute>} />

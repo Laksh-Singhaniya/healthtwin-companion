@@ -1,13 +1,13 @@
 import { useState, useRef, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
+import { PatientLayout } from "@/components/layouts/PatientLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Send, Bot, User, Loader2 } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { Send, Bot, User, Loader2 } from "lucide-react";
 
 interface Message {
   role: "user" | "assistant";
@@ -15,7 +15,6 @@ interface Message {
 }
 
 const HealthChat = () => {
-  const navigate = useNavigate();
   const { user } = useAuth();
   const { toast } = useToast();
   const [messages, setMessages] = useState<Message[]>([]);
@@ -75,12 +74,14 @@ const HealthChat = () => {
     setIsLoading(true);
 
     try {
+      const { data: { session } } = await supabase.auth.getSession();
+      
       const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/health-chat`;
       const response = await fetch(CHAT_URL, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+          Authorization: `Bearer ${session?.access_token}`,
         },
         body: JSON.stringify({ messages: [...messages, userMessage] }),
       });
@@ -140,13 +141,11 @@ const HealthChat = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background p-4">
-      <div className="max-w-4xl mx-auto">
-        <div className="flex items-center gap-4 mb-6">
-          <Button variant="ghost" onClick={() => navigate("/")}>
-            <ArrowLeft className="w-4 h-4" />
-          </Button>
+    <PatientLayout>
+      <div className="container mx-auto p-6">
+        <div className="mb-6">
           <h1 className="text-3xl font-bold">AI Health Assistant</h1>
+          <p className="text-muted-foreground">Chat with our AI for personalized health insights</p>
         </div>
 
         <Card className="h-[calc(100vh-200px)] flex flex-col">
@@ -215,7 +214,7 @@ const HealthChat = () => {
           </div>
         </Card>
       </div>
-    </div>
+    </PatientLayout>
   );
 };
 

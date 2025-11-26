@@ -1,11 +1,11 @@
 import { useState } from "react";
-import { NavLink } from "@/components/NavLink";
+import { PatientLayout } from "@/components/layouts/PatientLayout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Brain, TrendingUp, AlertTriangle, Lightbulb, Activity, ArrowLeft } from "lucide-react";
+import { Brain, TrendingUp, AlertTriangle, Lightbulb, Activity } from "lucide-react";
 
 const HealthPredictions = () => {
   const [predictions, setPredictions] = useState<string>("");
@@ -15,7 +15,13 @@ const HealthPredictions = () => {
   const generatePredictions = async () => {
     setIsLoading(true);
     try {
-      const { data, error } = await supabase.functions.invoke("health-predictions");
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      const { data, error } = await supabase.functions.invoke("health-predictions", {
+        headers: {
+          Authorization: `Bearer ${session?.access_token}`,
+        },
+      });
 
       if (error) {
         if (error.message.includes("Rate limits exceeded")) {
@@ -113,16 +119,11 @@ const HealthPredictions = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <PatientLayout>
       <div className="container mx-auto p-4 space-y-6">
-        <div className="flex items-center gap-4">
-          <NavLink to="/dashboard" icon={<ArrowLeft className="h-4 w-4" />}>
-            Back
-          </NavLink>
-          <div>
-            <h1 className="text-3xl font-bold">Health Predictions & Insights</h1>
-            <p className="text-muted-foreground">AI-powered analysis of your health data</p>
-          </div>
+        <div>
+          <h1 className="text-3xl font-bold">Health Predictions & Insights</h1>
+          <p className="text-muted-foreground">AI-powered analysis of your health data</p>
         </div>
 
         <Card>
@@ -176,7 +177,7 @@ const HealthPredictions = () => {
 
         {renderPredictions()}
       </div>
-    </div>
+    </PatientLayout>
   );
 };
 
