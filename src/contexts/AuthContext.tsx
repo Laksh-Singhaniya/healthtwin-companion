@@ -118,9 +118,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         navigate("/patient-dashboard");
       } else if (role === "doctor") {
         navigate("/doctor-portal");
-      } else {
-        navigate("/");
       }
+      // Don't redirect to "/" if role is not set - let the app handle it
     }
     
     return { error };
