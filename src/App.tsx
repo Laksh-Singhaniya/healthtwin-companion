@@ -29,12 +29,20 @@ const queryClient = new QueryClient();
 
 const PublicRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, loading, userRole } = useAuth();
-  if (loading) return <div className="flex items-center justify-center min-h-screen"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>;
+  if (loading)
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+
   if (user) {
     if (userRole === "doctor") return <Navigate to="/doctor-portal" replace />;
-    else if (userRole === "patient") return <Navigate to="/patient-dashboard" replace />;
-    return <Navigate to="/" replace />;
+    if (userRole === "patient") return <Navigate to="/patient-dashboard" replace />;
+    // If role is not yet determined, allow access to public routes like /auth
+    return <>{children}</>;
   }
+
   return <>{children}</>;
 };
 
