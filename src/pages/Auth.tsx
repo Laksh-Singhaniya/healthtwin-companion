@@ -20,11 +20,10 @@ const Auth = () => {
   const { toast } = useToast();
 
   useEffect(() => {
-    if (user) navigate("/");
     const role = searchParams.get("role");
     if (role === "doctor") setSelectedRole("doctor");
     else setSelectedRole("patient");
-  }, [user, searchParams, navigate]);
+  }, [searchParams]);
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
