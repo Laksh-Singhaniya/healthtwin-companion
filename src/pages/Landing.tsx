@@ -1,9 +1,19 @@
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { Heart, Activity, Brain, Calendar, Shield, Users } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+import { useEffect } from "react";
 
 const Landing = () => {
   const navigate = useNavigate();
+  const { user, userRole, loading } = useAuth();
+
+  useEffect(() => {
+    if (!loading && user && userRole) {
+      if (userRole === "doctor") navigate("/doctor-portal");
+      else if (userRole === "patient") navigate("/patient-dashboard");
+    }
+  }, [user, userRole, loading, navigate]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-teal-50 to-cyan-50">
