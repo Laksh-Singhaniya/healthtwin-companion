@@ -2,13 +2,50 @@ import { useState } from "react";
 import { PatientLayout } from "@/components/layouts/PatientLayout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
+import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Brain, TrendingUp, AlertTriangle, Lightbulb, Activity } from "lucide-react";
+import {   Brain,
+  TrendingUp,
+  TrendingDown,
+  Minus,
+  AlertTriangle,
+  Heart,
+  Activity,
+  Droplet,
+  Shield,
+  CheckCircle2,
+  XCircle,
+  AlertCircle
+} from "lucide-react";
+
+interface PredictionResult {
+  riskLevel: 'low' | 'moderate' | 'high' | 'very-high';
+  riskScore: number;
+  riskPercentage: number;
+  confidence: number;
+  factors: Array<{
+    name: string;
+    impact: 'positive' | 'negative' | 'neutral';
+    description: string;
+  }>;
+  recommendations: string[];
+}
+
+interface PredictionsData {
+  cardiovascular: PredictionResult;
+  diabetes: PredictionResult;
+  generalHealth: PredictionResult;
+  womensHealth?: PredictionResult;
+  vitalTrends: any;
+}
 
 const HealthPredictions = () => {
-  const [predictions, setPredictions] = useState<string>("");
+  const [predictions, setPredictions] = useState<PredictionsData | null>(null);
+  const [aiRecommendations, setAiRecommendations] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
@@ -24,28 +61,14 @@ const HealthPredictions = () => {
       });
 
       if (error) {
-        if (error.message.includes("Rate limits exceeded")) {
-          toast({
-            title: "Rate Limit Exceeded",
-            description: "Please try again in a few moments.",
-            variant: "destructive",
-          });
-        } else if (error.message.includes("Payment required")) {
-          toast({
-            title: "Payment Required",
-            description: "Please add funds to continue using AI features.",
-            variant: "destructive",
-          });
-        } else {
-          throw error;
-        }
-        return;
+        throw error;
       }
 
       setPredictions(data.predictions);
+      setAiRecommendations(data.aiRecommendations);
       toast({
-        title: "Predictions Generated",
-        description: "Your health insights are ready.",
+        title: "ML Predictions Complete",
+        description: "Comprehensive health risk assessment generated.",
       });
     } catch (error) {
       console.error("Error generating predictions:", error);
@@ -59,62 +82,135 @@ const HealthPredictions = () => {
     }
   };
 
-  const parseSection = (content: string, sectionTitle: string) => {
-    const regex = new RegExp(`${sectionTitle}[:\\s]*([\\s\\S]*?)(?=\\n\\n|$)`, "i");
-    const match = content.match(regex);
-    if (match) {
-      return match[1].trim();
+  const getRiskColor = (level: string) => {
+    switch (level) {
+      case 'low': return 'text-green-500 bg-green-500/10 border-green-500/20';
+      case 'moderate': return 'text-yellow-500 bg-yellow-500/10 border-yellow-500/20';
+      case 'high': return 'text-orange-500 bg-orange-500/10 border-orange-500/20';
+      case 'very-high': return 'text-red-500 bg-red-500/10 border-red-500/20';
+      default: return 'text-gray-500 bg-gray-500/10 border-gray-500/20';
     }
-    return null;
   };
 
-  const renderPredictions = () => {
-    if (!predictions) return null;
+  const getRiskIcon = (level: string) => {
+    switch (level) {
+      case 'low': return <CheckCircle2 className="h-5 w-5" />;
+      case 'moderate': return <AlertCircle className="h-5 w-5" />;
+      case 'high': return <AlertTriangle className="h-5 w-5" />;
+      case 'very-high': return <XCircle className="h-5 w-5" />;
+      default: return <Activity className="h-5 w-5" />;
+    }
+  };
 
-    const sections = [
-      { title: "Health Trend Analysis", icon: TrendingUp, color: "text-blue-500" },
-      { title: "Risk Assessments", icon: AlertTriangle, color: "text-amber-500" },
-      { title: "Personalized Recommendations", icon: Lightbulb, color: "text-green-500" },
-      { title: "Predictive Insights", icon: Brain, color: "text-purple-500" },
-      { title: "Menstrual Cycle Predictions", icon: Activity, color: "text-pink-500" },
-    ];
+  const renderPredictionCard = (
+    title: string,
+    icon: React.ReactNode,
+    prediction: PredictionResult,
+    color: string
+  ) => (
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            {icon}
+            {title}
+          </div>
+          <Badge className={getRiskColor(prediction.riskLevel)}>
+            {getRiskIcon(prediction.riskLevel)}
+            <span className="ml-1">{prediction.riskLevel.toUpperCase()}</span>
+          </Badge>
+        </CardTitle>
+        <CardDescription>
+          Risk Score: {prediction.riskPercentage}% • Confidence: {(prediction.confidence * 100).toFixed(0)}%
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div>
+          <div className="flex justify-between text-sm mb-2">
+            <span>Risk Assessment</span>
+            <span className="font-semibold">{prediction.riskPercentage}%</span>
+          </div>
+          <Progress value={prediction.riskPercentage} className="h-3" />
+        </div>
+
+        <div>
+          <h4 className="font-semibold mb-3 text-sm">Key Risk Factors</h4>
+          <div className="space-y-2">
+            {prediction.factors.map((factor, idx) => (
+              <div key={idx} className="flex items-start gap-2 text-sm">
+                {factor.impact === 'positive' ? (
+                  <CheckCircle2 className="h-4 w-4 text-green-500 flex-shrink-0 mt-0.5" />
+                ) : factor.impact === 'negative' ? (
+                  <XCircle className="h-4 w-4 text-red-500 flex-shrink-0 mt-0.5" />
+                ) : (
+                  <Minus className="h-4 w-4 text-gray-500 flex-shrink-0 mt-0.5" />
+                )}
+                <div>
+                  <span className="font-medium">{factor.name}:</span> {factor.description}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div>
+          <h4 className="font-semibold mb-3 text-sm">ML-Based Recommendations</h4>
+          <ul className="space-y-2">
+            {prediction.recommendations.map((rec, idx) => (
+              <li key={idx} className="text-sm flex items-start gap-2">
+                <Shield className="h-4 w-4 text-primary flex-shrink-0 mt-0.5" />
+                <span>{rec}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </CardContent>
+    </Card>
+  );
+
+  const renderTrends = () => {
+    if (!predictions?.vitalTrends) return null;
 
     return (
-      <div className="space-y-4">
-        {sections.map((section) => {
-          const content = parseSection(predictions, section.title);
-          if (!content) return null;
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <TrendingUp className="h-5 w-5" />
+            Vital Sign Trends
+          </CardTitle>
+          <CardDescription>Changes in your health metrics over time</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid gap-4">
+            {Object.entries(predictions.vitalTrends).map(([metric, trend]: [string, any]) => {
+              const getTrendIcon = () => {
+                if (trend.direction === 'increasing') return <TrendingUp className="h-4 w-4 text-orange-500" />;
+                if (trend.direction === 'decreasing') return <TrendingDown className="h-4 w-4 text-blue-500" />;
+                return <Minus className="h-4 w-4 text-gray-500" />;
+              };
 
-          const Icon = section.icon;
-          return (
-            <Card key={section.title}>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Icon className={`h-5 w-5 ${section.color}`} />
-                  {section.title}
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="prose prose-sm dark:prose-invert max-w-none">
-                  {content.split("\n").map((line, i) => (
-                    <p key={i} className="mb-2">{line}</p>
-                  ))}
+              return (
+                <div key={metric} className="flex items-center justify-between p-3 border rounded-lg">
+                  <div className="flex items-center gap-3">
+                    {getTrendIcon()}
+                    <div>
+                      <div className="font-medium text-sm capitalize">
+                        {metric.replace(/_/g, ' ')}
+                      </div>
+                      <div className="text-xs text-muted-foreground">
+                        {trend.previous.toFixed(1)} → {trend.current.toFixed(1)}
+                      </div>
+                    </div>
+                  </div>
+                  <Badge variant="outline">
+                    {trend.changePercent > 0 ? '+' : ''}{trend.changePercent.toFixed(1)}%
+                  </Badge>
                 </div>
-              </CardContent>
-            </Card>
-          );
-        })}
-        
-        <Card className="border-amber-500/50 bg-amber-500/5">
-          <CardContent className="pt-6">
-            <p className="text-sm text-muted-foreground">
-              <strong>Disclaimer:</strong> These predictions are AI-generated insights based on your health data. 
-              They are for informational purposes only and should not be considered medical advice. 
-              Always consult with a qualified healthcare professional for medical decisions.
-            </p>
-          </CardContent>
-        </Card>
-      </div>
+              );
+            })}
+          </div>
+        </CardContent>
+      </Card>
     );
   };
 
@@ -122,18 +218,21 @@ const HealthPredictions = () => {
     <PatientLayout>
       <div className="container mx-auto p-4 space-y-6">
         <div>
-          <h1 className="text-3xl font-bold">Health Predictions & Insights</h1>
-          <p className="text-muted-foreground">AI-powered analysis of your health data</p>
+          <h1 className="text-3xl font-bold">ML-Based Health Predictions</h1>
+          <p className="text-muted-foreground">
+            Advanced machine learning algorithms analyze your health data to predict risks and provide personalized recommendations
+          </p>
         </div>
 
-        <Card>
+        <Card className="border-primary/20 bg-gradient-to-r from-primary/5 to-accent/5">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Brain className="h-5 w-5" />
-              Generate AI Predictions
+              <Brain className="h-6 w-6 text-primary" />
+              Generate Comprehensive Health Assessment
             </CardTitle>
             <CardDescription>
-              Analyze your health data to identify trends, risks, and personalized recommendations
+              Uses Framingham Risk Score, FINDRISC, and advanced pattern analysis algorithms
+              combined with AI-powered personalized recommendations
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -146,12 +245,12 @@ const HealthPredictions = () => {
               {isLoading ? (
                 <>
                   <Brain className="mr-2 h-4 w-4 animate-pulse" />
-                  Analyzing Your Health Data...
+                  Running ML Algorithms...
                 </>
               ) : (
                 <>
                   <Brain className="mr-2 h-4 w-4" />
-                  Generate Predictions
+                  Run ML Predictions
                 </>
               )}
             </Button>
@@ -160,22 +259,157 @@ const HealthPredictions = () => {
 
         {isLoading && (
           <div className="space-y-4">
-            {[1, 2, 3, 4].map((i) => (
+            {[1, 2, 3].map((i) => (
               <Card key={i}>
                 <CardHeader>
                   <Skeleton className="h-6 w-48" />
                 </CardHeader>
                 <CardContent>
+                  <Skeleton className="h-20 w-full mb-4" />
                   <Skeleton className="h-4 w-full mb-2" />
-                  <Skeleton className="h-4 w-3/4 mb-2" />
-                  <Skeleton className="h-4 w-5/6" />
+                  <Skeleton className="h-4 w-3/4" />
                 </CardContent>
               </Card>
             ))}
           </div>
         )}
 
-        {renderPredictions()}
+        {predictions && !isLoading && (
+          <Tabs defaultValue="overview" className="w-full">
+            <TabsList className="grid w-full grid-cols-2 lg:grid-cols-5">
+              <TabsTrigger value="overview">Overview</TabsTrigger>
+              <TabsTrigger value="cardiovascular">Cardiovascular</TabsTrigger>
+              <TabsTrigger value="diabetes">Diabetes</TabsTrigger>
+              <TabsTrigger value="general">General Health</TabsTrigger>
+              {predictions.womensHealth && (
+                <TabsTrigger value="womens">Women's Health</TabsTrigger>
+              )}
+            </TabsList>
+
+            <TabsContent value="overview" className="space-y-4">
+              <div className="grid gap-4 md:grid-cols-3">
+                <Card className={`border ${getRiskColor(predictions.cardiovascular.riskLevel)}`}>
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-sm flex items-center gap-2">
+                      <Heart className="h-4 w-4" />
+                      Cardiovascular
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">{predictions.cardiovascular.riskPercentage}%</div>
+                    <p className="text-xs text-muted-foreground uppercase">
+                      {predictions.cardiovascular.riskLevel} Risk
+                    </p>
+                  </CardContent>
+                </Card>
+
+                <Card className={`border ${getRiskColor(predictions.diabetes.riskLevel)}`}>
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-sm flex items-center gap-2">
+                      <Droplet className="h-4 w-4" />
+                      Diabetes
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">{predictions.diabetes.riskPercentage}%</div>
+                    <p className="text-xs text-muted-foreground uppercase">
+                      {predictions.diabetes.riskLevel} Risk
+                    </p>
+                  </CardContent>
+                </Card>
+
+                <Card className={`border ${getRiskColor(predictions.generalHealth.riskLevel)}`}>
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-sm flex items-center gap-2">
+                      <Activity className="h-4 w-4" />
+                      General Health
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">{predictions.generalHealth.riskScore}/100</div>
+                    <p className="text-xs text-muted-foreground uppercase">Health Score</p>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {renderTrends()}
+
+              {aiRecommendations && (
+                <Card className="border-primary/30">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Brain className="h-5 w-5 text-primary" />
+                      AI-Generated Personalized Report
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="prose prose-sm max-w-none dark:prose-invert">
+                      {aiRecommendations.split('\n\n').map((paragraph, idx) => (
+                        <p key={idx}>{paragraph}</p>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+            </TabsContent>
+
+            <TabsContent value="cardiovascular" className="space-y-4">
+              {renderPredictionCard(
+                "Cardiovascular Disease Risk",
+                <Heart className="h-5 w-5 text-red-500" />,
+                predictions.cardiovascular,
+                "text-red-500"
+              )}
+            </TabsContent>
+
+            <TabsContent value="diabetes" className="space-y-4">
+              {renderPredictionCard(
+                "Type 2 Diabetes Risk",
+                <Droplet className="h-5 w-5 text-blue-500" />,
+                predictions.diabetes,
+                "text-blue-500"
+              )}
+            </TabsContent>
+
+            <TabsContent value="general" className="space-y-4">
+              {renderPredictionCard(
+                "General Health Assessment",
+                <Activity className="h-5 w-5 text-green-500" />,
+                predictions.generalHealth,
+                "text-green-500"
+              )}
+            </TabsContent>
+
+            {predictions.womensHealth && (
+              <TabsContent value="womens" className="space-y-4">
+                {renderPredictionCard(
+                  "Women's Health Analysis",
+                  <Heart className="h-5 w-5 text-pink-500" />,
+                  predictions.womensHealth,
+                  "text-pink-500"
+                )}
+              </TabsContent>
+            )}
+          </Tabs>
+        )}
+
+        {predictions && (
+          <Card className="border-amber-500/50 bg-amber-500/5">
+            <CardContent className="pt-6">
+              <div className="flex gap-3">
+                <AlertTriangle className="h-5 w-5 text-amber-500 flex-shrink-0 mt-0.5" />
+                <div>
+                  <p className="font-semibold text-sm mb-1">Medical Disclaimer</p>
+                  <p className="text-sm text-muted-foreground">
+                    These predictions use validated medical algorithms (Framingham Risk Score, FINDRISC) but are for
+                    informational purposes only. They should not replace professional medical advice, diagnosis, or treatment.
+                    Always consult qualified healthcare professionals for medical decisions.
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
       </div>
     </PatientLayout>
   );
