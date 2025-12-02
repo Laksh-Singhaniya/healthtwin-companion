@@ -7,18 +7,43 @@ import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const PatientAppointments = () => {
   const { user } = useAuth();
   const { toast } = useToast();
   const [appointments, setAppointments] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [doctors, setDoctors] = useState<any[]>([]);
+  const [bookingOpen, setBookingOpen] = useState(false);
+  const [bookingForm, setBookingForm] = useState({
+    doctor_id: "",
+    scheduled_time: "",
+    type: "in-person",
+    reason: "",
+  });
 
   useEffect(() => {
     if (user) {
       fetchAppointments();
+      fetchDoctors();
     }
   }, [user]);
+
+  const fetchDoctors = async () => {
+    const { data, error } = await supabase
+      .from("doctors")
+      .select("*")
+      .order("full_name");
+
+    if (!error && data) {
+      setDoctors(data);
+    }
+  };
 
   const fetchAppointments = async () => {
     if (!user) return;
@@ -71,6 +96,47 @@ const PatientAppointments = () => {
     (apt) => new Date(apt.scheduled_time) < new Date() || apt.status === "completed"
   );
 
+  const handleBookAppointment = async () => {
+    if (!user || !bookingForm.doctor_id || !bookingForm.scheduled_time) {
+      toast({
+        title: "Error",
+        description: "Please fill in all required fields",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const { error } = await supabase.from("appointments").insert({
+      patient_id: user.id,
+      doctor_id: bookingForm.doctor_id,
+      scheduled_time: bookingForm.scheduled_time,
+      type: bookingForm.type,
+      reason: bookingForm.reason,
+      status: "pending",
+    });
+
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Failed to book appointment",
+        variant: "destructive",
+      });
+    } else {
+      toast({
+        title: "Success",
+        description: "Appointment booked successfully",
+      });
+      setBookingOpen(false);
+      setBookingForm({
+        doctor_id: "",
+        scheduled_time: "",
+        type: "in-person",
+        reason: "",
+      });
+      fetchAppointments();
+    }
+  };
+
   return (
     <PatientLayout>
       <div className="p-6 space-y-6">
@@ -80,10 +146,67 @@ const PatientAppointments = () => {
             <h1 className="text-3xl font-bold">Appointments</h1>
             <p className="text-muted-foreground">Manage your doctor consultations</p>
           </div>
-          <Button className="gap-2">
-            <Plus className="h-4 w-4" />
-            Book New Appointment
-          </Button>
+          <Sheet open={bookingOpen} onOpenChange={setBookingOpen}>
+            <SheetTrigger asChild>
+              <Button className="gap-2">
+                <Plus className="h-4 w-4" />
+                Book New Appointment
+              </Button>
+            </SheetTrigger>
+            <SheetContent>
+              <SheetHeader>
+                <SheetTitle>Book New Appointment</SheetTitle>
+              </SheetHeader>
+              <div className="space-y-4 py-4">
+                <div className="space-y-2">
+                  <Label>Select Doctor *</Label>
+                  <Select value={bookingForm.doctor_id} onValueChange={(value) => setBookingForm({ ...bookingForm, doctor_id: value })}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Choose a doctor" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {doctors.map((doctor) => (
+                        <SelectItem key={doctor.id} value={doctor.id}>
+                          {doctor.full_name} - {doctor.specialization}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label>Date & Time *</Label>
+                  <Input
+                    type="datetime-local"
+                    value={bookingForm.scheduled_time}
+                    onChange={(e) => setBookingForm({ ...bookingForm, scheduled_time: e.target.value })}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Appointment Type</Label>
+                  <Select value={bookingForm.type} onValueChange={(value) => setBookingForm({ ...bookingForm, type: value })}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="in-person">In-Person</SelectItem>
+                      <SelectItem value="video">Video Consultation</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label>Reason for Visit</Label>
+                  <Textarea
+                    placeholder="Describe your symptoms or reason for consultation"
+                    value={bookingForm.reason}
+                    onChange={(e) => setBookingForm({ ...bookingForm, reason: e.target.value })}
+                  />
+                </div>
+                <Button className="w-full" onClick={handleBookAppointment}>
+                  Confirm Booking
+                </Button>
+              </div>
+            </SheetContent>
+          </Sheet>
         </div>
 
         {/* Upcoming Appointments */}
