@@ -11,4 +11,4 @@ max_rows = 1000
 verify_jwt = true
 
 [functions.health-predictions]
-verify_jwt = false
+verify_jwt = true
