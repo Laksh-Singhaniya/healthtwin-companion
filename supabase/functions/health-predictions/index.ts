@@ -26,33 +26,37 @@ serve(async (req) => {
   }
 
   try {
-    const supabaseClient = createClient(
-      Deno.env.get("SUPABASE_URL") ?? "",
-      Deno.env.get("SUPABASE_ANON_KEY") ?? "",
-      {
-        global: {
-          headers: { Authorization: req.headers.get("Authorization")! },
-        },
-      }
-    );
-
-    const {
-      data: { user },
-    } = await supabaseClient.auth.getUser();
-
-    if (!user) {
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
       return new Response(JSON.stringify({ error: "Unauthorized" }), {
         status: 401,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
+    const token = authHeader.replace("Bearer ", "");
+    const payloadPart = token.split(".")[1];
+    const decodedPayload = JSON.parse(atob(payloadPart.replace(/-/g, "+").replace(/_/g, "/")));
+    const userId = decodedPayload.sub as string | undefined;
+
+    if (!userId) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const supabaseClient = createClient(
+      Deno.env.get("SUPABASE_URL") ?? "",
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
+    );
+
     // Fetch comprehensive health data
     const [profileData, vitalsData, medicationsData, menstrualData] = await Promise.all([
-      supabaseClient.from("health_profiles").select("*").eq("user_id", user.id).single(),
-      supabaseClient.from("vital_signs").select("*").eq("user_id", user.id).order("recorded_at", { ascending: false }).limit(30),
-      supabaseClient.from("medications").select("*").eq("user_id", user.id),
-      supabaseClient.from("menstrual_cycles").select("*").eq("user_id", user.id).order("cycle_start_date", { ascending: false }).limit(12),
+      supabaseClient.from("health_profiles").select("*").eq("user_id", userId).single(),
+      supabaseClient.from("vital_signs").select("*").eq("user_id", userId).order("recorded_at", { ascending: false }).limit(30),
+      supabaseClient.from("medications").select("*").eq("user_id", userId),
+      supabaseClient.from("menstrual_cycles").select("*").eq("user_id", userId).order("cycle_start_date", { ascending: false }).limit(12),
     ]);
 
     // Calculate vital trends
