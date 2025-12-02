@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Download, Share2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { toPng } from "html-to-image";
 
 const HealthCard = () => {
   const { user } = useAuth();
@@ -52,6 +53,35 @@ const HealthCard = () => {
     }
   };
 
+  const handleDownload = async () => {
+    const cardElement = document.getElementById("health-card-content");
+    if (!cardElement) return;
+
+    try {
+      const dataUrl = await toPng(cardElement, {
+        quality: 0.95,
+        pixelRatio: 2,
+      });
+      
+      const link = document.createElement("a");
+      link.download = `health-card-${healthProfile?.health_id}.png`;
+      link.href = dataUrl;
+      link.click();
+      
+      toast({
+        title: "Downloaded!",
+        description: "Health card saved as image",
+      });
+    } catch (err) {
+      console.error("Download failed:", err);
+      toast({
+        title: "Download failed",
+        description: "Could not download health card",
+        variant: "destructive",
+      });
+    }
+  };
+
   const handleShare = async () => {
     const shareUrl = `${window.location.origin}/health-card/${healthProfile?.health_id}`;
     
@@ -87,7 +117,7 @@ const HealthCard = () => {
               <Share2 className="w-4 h-4 mr-2" />
               Share
             </Button>
-            <Button variant="outline">
+            <Button variant="outline" onClick={handleDownload}>
               <Download className="w-4 h-4 mr-2" />
               Download
             </Button>
