@@ -52,13 +52,7 @@ const HealthPredictions = () => {
   const generatePredictions = async () => {
     setIsLoading(true);
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      const { data, error } = await supabase.functions.invoke("health-predictions", {
-        headers: {
-          Authorization: `Bearer ${session?.access_token}`,
-        },
-      });
+      const { data, error } = await supabase.functions.invoke("health-predictions");
 
       if (error) {
         throw error;
