@@ -30,8 +30,10 @@ export const HealthCard = ({
   medications = [],
   userName = "User",
 }: HealthCardProps) => {
+  const qrCodeUrl = `${window.location.origin}/health-card/${healthProfile.health_id}`;
+  
   return (
-    <Card className="w-full max-w-2xl mx-auto shadow-large border-border/50">
+    <Card className="w-full max-w-2xl mx-auto shadow-large border-border/50" id="health-card-content">
       <CardHeader className="bg-gradient-to-r from-primary to-primary-light text-primary-foreground rounded-t-xl">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -44,7 +46,7 @@ export const HealthCard = ({
             </div>
           </div>
           <div className="bg-background p-3 rounded-lg">
-            <QRCodeSVG value={healthProfile.health_id} size={80} level="H" />
+            <QRCodeSVG value={qrCodeUrl} size={80} level="H" />
           </div>
         </div>
       </CardHeader>
