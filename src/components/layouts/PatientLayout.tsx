@@ -9,13 +9,15 @@ import {
   MessageSquare,
   FileText,
   TrendingUp,
-  IdCard
+  IdCard,
+  User
 } from "lucide-react";
 import { useLocation } from "react-router-dom";
 import { NavLink } from "@/components/NavLink";
 
 const patientNavItems = [
   { to: "/patient-dashboard", icon: LayoutDashboard, label: "Dashboard" },
+  { to: "/patient/profile", icon: User, label: "Profile" },
   { to: "/health-card", icon: IdCard, label: "Health Card" },
   { to: "/health-monitoring", icon: Activity, label: "Vital Signs" },
   { to: "/womens-health", icon: Heart, label: "Women's Health" },

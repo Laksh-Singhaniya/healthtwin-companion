@@ -16,6 +16,7 @@ import HealthChat from "./pages/HealthChat";
 import DoctorDashboard from "./pages/doctor/Dashboard";
 import PatientAppointments from "./pages/patient/Appointments";
 import PatientMessages from "./pages/patient/Messages";
+import PatientProfile from "./pages/patient/Profile";
 import DoctorAppointments from "./pages/doctor/Appointments";
 import DoctorMessages from "./pages/doctor/Messages";
 import PatientManagement from "./pages/doctor/PatientManagement";
@@ -68,6 +69,7 @@ const App = () => (
             <Route path="/health-chat" element={<RoleProtectedRoute allowedRoles={["patient"]}><HealthChat /></RoleProtectedRoute>} />
             <Route path="/patient/appointments" element={<RoleProtectedRoute allowedRoles={["patient"]}><PatientAppointments /></RoleProtectedRoute>} />
             <Route path="/patient/messages" element={<RoleProtectedRoute allowedRoles={["patient"]}><PatientMessages /></RoleProtectedRoute>} />
+            <Route path="/patient/profile" element={<RoleProtectedRoute allowedRoles={["patient"]}><PatientProfile /></RoleProtectedRoute>} />
             <Route path="/doctor-portal" element={<RoleProtectedRoute allowedRoles={["doctor"]}><DoctorDashboard /></RoleProtectedRoute>} />
             <Route path="/doctor/patients" element={<RoleProtectedRoute allowedRoles={["doctor"]}><PatientManagement /></RoleProtectedRoute>} />
             <Route path="/doctor/appointments" element={<RoleProtectedRoute allowedRoles={["doctor"]}><DoctorAppointments /></RoleProtectedRoute>} />
