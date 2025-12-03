@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { Phone, Plus, Trash2, Star } from "lucide-react";
-import { NavLink } from "@/components/NavLink";
+import { PatientLayout } from "@/components/layouts/PatientLayout";
 
 type EmergencyContact = {
   id: string;
@@ -103,22 +103,13 @@ export default function EmergencyContacts() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <nav className="border-b border-border bg-card">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <h1 className="text-2xl font-bold text-foreground">Emergency Contacts</h1>
-            <div className="flex gap-4">
-              <NavLink to="/">Dashboard</NavLink>
-              <NavLink to="/health-monitoring">Vitals</NavLink>
-              <NavLink to="/womens-health">Women's Health</NavLink>
-              <NavLink to="/medications-allergies">Medications</NavLink>
-            </div>
-          </div>
+    <PatientLayout>
+      <div className="space-y-8">
+        <div>
+          <h1 className="text-3xl font-bold">Emergency Contacts</h1>
+          <p className="text-muted-foreground">Manage your emergency contact information</p>
         </div>
-      </nav>
 
-      <main className="container mx-auto px-4 py-8">
         <Card>
           <CardHeader>
             <div className="flex items-center justify-between">
@@ -127,7 +118,7 @@ export default function EmergencyContacts() {
                   <Phone className="w-5 h-5" />
                   Emergency Contacts
                 </CardTitle>
-                <CardDescription>Manage your emergency contact information</CardDescription>
+                <CardDescription>People to contact in case of emergency</CardDescription>
               </div>
               <Button onClick={() => setShowForm(!showForm)}>
                 <Plus className="w-4 h-4 mr-2" />
@@ -241,7 +232,7 @@ export default function EmergencyContacts() {
             </div>
           </CardContent>
         </Card>
-      </main>
-    </div>
+      </div>
+    </PatientLayout>
   );
 }

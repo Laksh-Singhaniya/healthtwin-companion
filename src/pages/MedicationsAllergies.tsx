@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/hooks/use-toast";
 import { Pill, AlertTriangle, Plus, Trash2 } from "lucide-react";
 import { format } from "date-fns";
-import { NavLink } from "@/components/NavLink";
+import { PatientLayout } from "@/components/layouts/PatientLayout";
 
 type Medication = {
   id: string;
@@ -161,21 +161,13 @@ export default function MedicationsAllergies() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <nav className="border-b border-border bg-card">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <h1 className="text-2xl font-bold text-foreground">Medications & Allergies</h1>
-            <div className="flex gap-4">
-              <NavLink to="/">Dashboard</NavLink>
-              <NavLink to="/health-monitoring">Vitals</NavLink>
-              <NavLink to="/womens-health">Women's Health</NavLink>
-            </div>
-          </div>
+    <PatientLayout>
+      <div className="space-y-8">
+        <div>
+          <h1 className="text-3xl font-bold">Medications & Allergies</h1>
+          <p className="text-muted-foreground">Track your medications and allergies</p>
         </div>
-      </nav>
 
-      <main className="container mx-auto px-4 py-8 space-y-8">
         {/* Medications */}
         <Card>
           <CardHeader>
@@ -396,7 +388,7 @@ export default function MedicationsAllergies() {
             </div>
           </CardContent>
         </Card>
-      </main>
-    </div>
+      </div>
+    </PatientLayout>
   );
 }
