@@ -17,9 +17,11 @@ import DoctorDashboard from "./pages/doctor/Dashboard";
 import PatientAppointments from "./pages/patient/Appointments";
 import PatientMessages from "./pages/patient/Messages";
 import PatientProfile from "./pages/patient/Profile";
+import MyDoctors from "./pages/patient/MyDoctors";
 import DoctorAppointments from "./pages/doctor/Appointments";
 import DoctorMessages from "./pages/doctor/Messages";
 import PatientManagement from "./pages/doctor/PatientManagement";
+import PatientRecords from "./pages/doctor/PatientRecords";
 import DoctorProfile from "./pages/doctor/Profile";
 import HealthCard from "./pages/HealthCard";
 import PublicHealthCard from "./pages/PublicHealthCard";
@@ -41,7 +43,6 @@ const PublicRoute = ({ children }: { children: React.ReactNode }) => {
   if (user) {
     if (userRole === "doctor") return <Navigate to="/doctor-portal" replace />;
     if (userRole === "patient") return <Navigate to="/patient-dashboard" replace />;
-    // If role is not yet determined, allow access to public routes like /auth
     return <>{children}</>;
   }
 
@@ -70,8 +71,10 @@ const App = () => (
             <Route path="/patient/appointments" element={<RoleProtectedRoute allowedRoles={["patient"]}><PatientAppointments /></RoleProtectedRoute>} />
             <Route path="/patient/messages" element={<RoleProtectedRoute allowedRoles={["patient"]}><PatientMessages /></RoleProtectedRoute>} />
             <Route path="/patient/profile" element={<RoleProtectedRoute allowedRoles={["patient"]}><PatientProfile /></RoleProtectedRoute>} />
+            <Route path="/patient/my-doctors" element={<RoleProtectedRoute allowedRoles={["patient"]}><MyDoctors /></RoleProtectedRoute>} />
             <Route path="/doctor-portal" element={<RoleProtectedRoute allowedRoles={["doctor"]}><DoctorDashboard /></RoleProtectedRoute>} />
             <Route path="/doctor/patients" element={<RoleProtectedRoute allowedRoles={["doctor"]}><PatientManagement /></RoleProtectedRoute>} />
+            <Route path="/doctor/patients/:patientId/records" element={<RoleProtectedRoute allowedRoles={["doctor"]}><PatientRecords /></RoleProtectedRoute>} />
             <Route path="/doctor/appointments" element={<RoleProtectedRoute allowedRoles={["doctor"]}><DoctorAppointments /></RoleProtectedRoute>} />
             <Route path="/doctor/messages" element={<RoleProtectedRoute allowedRoles={["doctor"]}><DoctorMessages /></RoleProtectedRoute>} />
             <Route path="/doctor/profile" element={<RoleProtectedRoute allowedRoles={["doctor"]}><DoctorProfile /></RoleProtectedRoute>} />

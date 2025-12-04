@@ -1,14 +1,16 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { DoctorLayout } from "@/components/layouts/DoctorLayout";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search, Users } from "lucide-react";
+import { Search, Users, FileText } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 
 const PatientManagement = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [patients, setPatients] = useState<any[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [doctorId, setDoctorId] = useState<string | null>(null);
@@ -56,6 +58,11 @@ const PatientManagement = () => {
     }
   };
 
+  const filteredPatients = patients.filter((patient) =>
+    patient.health_profiles?.health_id?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    patient.health_profiles?.blood_type?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   return (
     <DoctorLayout>
       <div className="p-6 space-y-6">
@@ -66,19 +73,17 @@ const PatientManagement = () => {
           </div>
         </div>
 
-        {/* Search */}
         <div className="relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder="Search patients..."
+            placeholder="Search patients by ID or blood type..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="pl-10"
           />
         </div>
 
-        {/* Patients List */}
-        {patients.length === 0 ? (
+        {filteredPatients.length === 0 ? (
           <Card>
             <CardContent className="p-12 text-center">
               <Users className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
@@ -93,7 +98,7 @@ const PatientManagement = () => {
                 <table className="w-full">
                   <thead className="bg-muted/50">
                     <tr>
-                      <th className="text-left p-4 font-medium">Patient ID</th>
+                      <th className="text-left p-4 font-medium">Health ID</th>
                       <th className="text-left p-4 font-medium">Blood Type</th>
                       <th className="text-left p-4 font-medium">Gender</th>
                       <th className="text-left p-4 font-medium">Access Granted</th>
@@ -101,14 +106,22 @@ const PatientManagement = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {patients.map((patient) => (
+                    {filteredPatients.map((patient) => (
                       <tr key={patient.id} className="border-t hover:bg-muted/30">
-                        <td className="p-4">{patient.health_profiles?.health_id || "N/A"}</td>
+                        <td className="p-4 font-mono text-sm">{patient.health_profiles?.health_id || "N/A"}</td>
                         <td className="p-4">{patient.health_profiles?.blood_type || "N/A"}</td>
-                        <td className="p-4">{patient.health_profiles?.gender || "N/A"}</td>
+                        <td className="p-4 capitalize">{patient.health_profiles?.gender || "N/A"}</td>
                         <td className="p-4">{new Date(patient.granted_at).toLocaleDateString()}</td>
                         <td className="p-4">
-                          <Button size="sm" variant="outline">View Records</Button>
+                          <Button 
+                            size="sm" 
+                            variant="outline"
+                            onClick={() => navigate(`/doctor/patients/${patient.patient_id}/records`)}
+                            className="gap-2"
+                          >
+                            <FileText className="h-4 w-4" />
+                            View Records
+                          </Button>
                         </td>
                       </tr>
                     ))}
