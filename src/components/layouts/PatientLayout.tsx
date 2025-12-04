@@ -23,6 +23,7 @@ const patientNavItems = [
   { to: "/womens-health", icon: Heart, label: "Women's Health" },
   { to: "/medications", icon: Pill, label: "Medications" },
   { to: "/patient/appointments", icon: Calendar, label: "Appointments" },
+  { to: "/patient/my-doctors", icon: User, label: "My Doctors" },
   { to: "/patient/messages", icon: MessageSquare, label: "Messages" },
   { to: "/health-chat", icon: MessageSquare, label: "AI Assistant" },
   { to: "/health-predictions", icon: TrendingUp, label: "Predictions" },
