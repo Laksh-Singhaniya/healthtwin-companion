@@ -67,28 +67,45 @@ const MyDoctors = () => {
   const fetchGrantedDoctors = async () => {
     if (!user) return;
 
-    const { data, error } = await supabase
+    // First fetch access records
+    const { data: accessData, error: accessError } = await supabase
       .from("patient_doctor_access")
-      .select(`
-        *,
-        doctors (
-          id,
-          user_id,
-          full_name,
-          specialization,
-          clinic_name,
-          email,
-          phone
-        )
-      `)
+      .select("*")
       .eq("patient_id", user.id)
       .eq("status", "active");
 
-    if (error) {
-      console.error("Error fetching granted doctors:", error);
-    } else {
-      setGrantedDoctors((data as unknown as DoctorAccess[]) || []);
+    if (accessError) {
+      console.error("Error fetching access records:", accessError);
+      setLoading(false);
+      return;
     }
+
+    if (!accessData || accessData.length === 0) {
+      setGrantedDoctors([]);
+      setLoading(false);
+      return;
+    }
+
+    // Then fetch doctors for those access records
+    const doctorIds = accessData.map((a) => a.doctor_id);
+    const { data: doctorsData, error: doctorsError } = await supabase
+      .from("doctors")
+      .select("*")
+      .in("id", doctorIds);
+
+    if (doctorsError) {
+      console.error("Error fetching doctors:", doctorsError);
+      setLoading(false);
+      return;
+    }
+
+    // Combine the data
+    const combined = accessData.map((access) => ({
+      ...access,
+      doctors: doctorsData?.find((d) => d.id === access.doctor_id) || null,
+    })) as unknown as DoctorAccess[];
+
+    setGrantedDoctors(combined);
     setLoading(false);
   };
 

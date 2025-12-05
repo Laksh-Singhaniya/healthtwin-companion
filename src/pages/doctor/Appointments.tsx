@@ -1,18 +1,30 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { DoctorLayout } from "@/components/layouts/DoctorLayout";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Calendar, Clock, Video, MapPin, Check, X } from "lucide-react";
+import { Calendar, Clock, Video, MapPin, Check, X, FileText, StickyNote } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
 
 const DoctorAppointments = () => {
   const { user } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [appointments, setAppointments] = useState<any[]>([]);
   const [doctorId, setDoctorId] = useState<string | null>(null);
+  const [notesDialogOpen, setNotesDialogOpen] = useState(false);
+  const [selectedAppointment, setSelectedAppointment] = useState<any>(null);
+  const [notes, setNotes] = useState("");
 
   useEffect(() => {
     if (user) {
@@ -77,6 +89,40 @@ const DoctorAppointments = () => {
 
   const pendingAppointments = appointments.filter((apt) => apt.status === "pending");
   const confirmedAppointments = appointments.filter((apt) => apt.status === "confirmed");
+
+  const handleViewPatient = (patientId: string) => {
+    navigate(`/doctor/patients/${patientId}/records`);
+  };
+
+  const handleOpenNotes = (appointment: any) => {
+    setSelectedAppointment(appointment);
+    setNotes(appointment.notes || "");
+    setNotesDialogOpen(true);
+  };
+
+  const handleSaveNotes = async () => {
+    if (!selectedAppointment) return;
+
+    const { error } = await supabase
+      .from("appointments")
+      .update({ notes })
+      .eq("id", selectedAppointment.id);
+
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Failed to save notes",
+        variant: "destructive",
+      });
+    } else {
+      toast({
+        title: "Success",
+        description: "Notes saved successfully",
+      });
+      setNotesDialogOpen(false);
+      fetchAppointments();
+    }
+  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -224,8 +270,23 @@ const DoctorAppointments = () => {
                       </div>
 
                       <div className="flex flex-col gap-2">
-                        <Button size="sm">View Patient</Button>
-                        <Button size="sm" variant="outline">Add Notes</Button>
+                        <Button 
+                          size="sm"
+                          onClick={() => handleViewPatient(appointment.patient_id)}
+                          className="gap-2"
+                        >
+                          <FileText className="h-4 w-4" />
+                          View Patient
+                        </Button>
+                        <Button 
+                          size="sm" 
+                          variant="outline"
+                          onClick={() => handleOpenNotes(appointment)}
+                          className="gap-2"
+                        >
+                          <StickyNote className="h-4 w-4" />
+                          {appointment.notes ? "Edit Notes" : "Add Notes"}
+                        </Button>
                       </div>
                     </div>
                   </CardContent>
@@ -234,6 +295,31 @@ const DoctorAppointments = () => {
             </div>
           )}
         </div>
+
+        {/* Notes Dialog */}
+        <Dialog open={notesDialogOpen} onOpenChange={setNotesDialogOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Appointment Notes</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <Textarea
+                placeholder="Add consultation notes, observations, or prescriptions..."
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+                rows={6}
+              />
+              <div className="flex justify-end gap-2">
+                <Button variant="outline" onClick={() => setNotesDialogOpen(false)}>
+                  Cancel
+                </Button>
+                <Button onClick={handleSaveNotes}>
+                  Save Notes
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
     </DoctorLayout>
   );
