@@ -44,18 +44,32 @@ const PatientManagement = () => {
   const fetchPatients = async () => {
     if (!doctorId) return;
 
-    const { data } = await supabase
+    // First fetch access records
+    const { data: accessData, error: accessError } = await supabase
       .from("patient_doctor_access")
-      .select(`
-        *,
-        health_profiles!inner(*)
-      `)
+      .select("*")
       .eq("doctor_id", doctorId)
       .eq("status", "active");
 
-    if (data) {
-      setPatients(data);
+    if (accessError || !accessData || accessData.length === 0) {
+      setPatients([]);
+      return;
     }
+
+    // Then fetch health profiles for those patients
+    const patientIds = accessData.map((a) => a.patient_id);
+    const { data: profilesData } = await supabase
+      .from("health_profiles")
+      .select("*")
+      .in("user_id", patientIds);
+
+    // Combine the data
+    const combined = accessData.map((access) => ({
+      ...access,
+      health_profiles: profilesData?.find((p) => p.user_id === access.patient_id) || null,
+    }));
+
+    setPatients(combined);
   };
 
   const filteredPatients = patients.filter((patient) =>
