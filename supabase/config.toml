@@ -12,3 +12,9 @@ verify_jwt = true
 
 [functions.health-predictions]
 verify_jwt = true
+
+[functions.iot-webhook]
+verify_jwt = false
+
+[functions.create-video-room]
+verify_jwt = true

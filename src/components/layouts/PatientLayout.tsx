@@ -10,7 +10,8 @@ import {
   FileText,
   TrendingUp,
   IdCard,
-  User
+  User,
+  Video
 } from "lucide-react";
 import { useLocation } from "react-router-dom";
 import { NavLink } from "@/components/NavLink";
@@ -23,6 +24,7 @@ const patientNavItems = [
   { to: "/womens-health", icon: Heart, label: "Women's Health" },
   { to: "/medications", icon: Pill, label: "Medications" },
   { to: "/patient/appointments", icon: Calendar, label: "Appointments" },
+  { to: "/patient/video-consultation", icon: Video, label: "Video Consult" },
   { to: "/patient/my-doctors", icon: User, label: "My Doctors" },
   { to: "/patient/messages", icon: MessageSquare, label: "Messages" },
   { to: "/health-chat", icon: MessageSquare, label: "AI Assistant" },

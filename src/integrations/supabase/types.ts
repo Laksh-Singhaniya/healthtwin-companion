@@ -58,6 +58,8 @@ export type Database = {
           status: string | null
           type: string | null
           updated_at: string | null
+          video_room_name: string | null
+          video_room_url: string | null
         }
         Insert: {
           created_at?: string | null
@@ -72,6 +74,8 @@ export type Database = {
           status?: string | null
           type?: string | null
           updated_at?: string | null
+          video_room_name?: string | null
+          video_room_url?: string | null
         }
         Update: {
           created_at?: string | null
@@ -86,6 +90,8 @@ export type Database = {
           status?: string | null
           type?: string | null
           updated_at?: string | null
+          video_room_name?: string | null
+          video_room_url?: string | null
         }
         Relationships: [
           {
@@ -460,11 +466,14 @@ export type Database = {
           blood_pressure_diastolic: number | null
           blood_pressure_systolic: number | null
           created_at: string
+          device_id: string | null
+          device_type: string | null
           heart_rate: number | null
           id: string
           notes: string | null
           oxygen_saturation: number | null
           recorded_at: string
+          source: string | null
           temperature: number | null
           user_id: string
           weight: number | null
@@ -474,11 +483,14 @@ export type Database = {
           blood_pressure_diastolic?: number | null
           blood_pressure_systolic?: number | null
           created_at?: string
+          device_id?: string | null
+          device_type?: string | null
           heart_rate?: number | null
           id?: string
           notes?: string | null
           oxygen_saturation?: number | null
           recorded_at?: string
+          source?: string | null
           temperature?: number | null
           user_id: string
           weight?: number | null
@@ -488,11 +500,14 @@ export type Database = {
           blood_pressure_diastolic?: number | null
           blood_pressure_systolic?: number | null
           created_at?: string
+          device_id?: string | null
+          device_type?: string | null
           heart_rate?: number | null
           id?: string
           notes?: string | null
           oxygen_saturation?: number | null
           recorded_at?: string
+          source?: string | null
           temperature?: number | null
           user_id?: string
           weight?: number | null

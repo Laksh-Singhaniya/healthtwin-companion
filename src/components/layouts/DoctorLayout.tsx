@@ -5,7 +5,8 @@ import {
   Users, 
   Calendar, 
   MessageSquare,
-  User
+  User,
+  Video
 } from "lucide-react";
 import { useLocation } from "react-router-dom";
 import { NavLink } from "@/components/NavLink";
@@ -14,6 +15,7 @@ const doctorNavItems = [
   { to: "/doctor-portal", icon: LayoutDashboard, label: "Dashboard" },
   { to: "/doctor/patients", icon: Users, label: "My Patients" },
   { to: "/doctor/appointments", icon: Calendar, label: "Appointments" },
+  { to: "/doctor/video-consultation", icon: Video, label: "Video Consult" },
   { to: "/doctor/messages", icon: MessageSquare, label: "Messages" },
   { to: "/doctor/profile", icon: User, label: "Profile" },
 ];
