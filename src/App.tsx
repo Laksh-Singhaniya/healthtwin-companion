@@ -9,6 +9,7 @@ import Landing from "./pages/Landing";
 import PatientDashboard from "./pages/patient/Dashboard";
 import HealthMonitoring from "./pages/HealthMonitoring";
 import HealthPredictions from "./pages/HealthPredictions";
+import DigitalTwin from "./pages/DigitalTwin";
 import MedicationsAllergies from "./pages/MedicationsAllergies";
 import EmergencyContacts from "./pages/EmergencyContacts";
 import WomensHealth from "./pages/WomensHealth";
@@ -66,6 +67,7 @@ const App = () => (
             <Route path="/health-card" element={<RoleProtectedRoute allowedRoles={["patient"]}><HealthCard /></RoleProtectedRoute>} />
             <Route path="/health-monitoring" element={<RoleProtectedRoute allowedRoles={["patient"]}><HealthMonitoring /></RoleProtectedRoute>} />
             <Route path="/health-predictions" element={<RoleProtectedRoute allowedRoles={["patient"]}><HealthPredictions /></RoleProtectedRoute>} />
+            <Route path="/digital-twin" element={<RoleProtectedRoute allowedRoles={["patient"]}><DigitalTwin /></RoleProtectedRoute>} />
             <Route path="/medications" element={<RoleProtectedRoute allowedRoles={["patient"]}><MedicationsAllergies /></RoleProtectedRoute>} />
             <Route path="/emergency-contacts" element={<RoleProtectedRoute allowedRoles={["patient"]}><EmergencyContacts /></RoleProtectedRoute>} />
             <Route path="/womens-health" element={<RoleProtectedRoute allowedRoles={["patient"]}><WomensHealth /></RoleProtectedRoute>} />
