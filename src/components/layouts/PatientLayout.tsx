@@ -11,7 +11,8 @@ import {
   TrendingUp,
   IdCard,
   User,
-  Video
+  Video,
+  Dna
 } from "lucide-react";
 import { useLocation } from "react-router-dom";
 import { NavLink } from "@/components/NavLink";
@@ -29,6 +30,7 @@ const patientNavItems = [
   { to: "/patient/messages", icon: MessageSquare, label: "Messages" },
   { to: "/health-chat", icon: MessageSquare, label: "AI Assistant" },
   { to: "/health-predictions", icon: TrendingUp, label: "Predictions" },
+  { to: "/digital-twin", icon: Dna, label: "Digital Twin" },
   { to: "/emergency-contacts", icon: FileText, label: "Emergency" },
 ];
 
