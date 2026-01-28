@@ -90,7 +90,6 @@ serve(async (req) => {
           exp: expiryTime,
           enable_chat: true,
           enable_screenshare: true,
-          enable_recording: 'cloud',
           max_participants: 2,
         },
       }),
