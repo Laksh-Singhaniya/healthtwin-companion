@@ -1,5 +1,11 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
+ import {
+   calculateCardiovascularRisk,
+   calculateDiabetesRisk,
+   calculateGeneralHealthScore,
+   buildPatientFeatures,
+ } from "../_shared/riskEngine.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -363,21 +369,17 @@ serve(async (req) => {
       ),
     };
 
-    // Calculate current risk levels
-    const currentRisks = {
-      cardiovascular: Math.min(85, Math.max(10, 
-        ((currentSystolic - 100) / 60) * 50 + 
-        ((currentHeartRate - 60) / 40) * 20
-      )),
-      diabetes: Math.min(80, Math.max(5,
-        ((currentGlucose - 80) / 70) * 60
-      )),
-      general: Math.max(20, 100 - 
-        (Math.abs(currentSystolic - 120) / 2) -
-        (Math.abs(currentHeartRate - 70) / 2) -
-        (Math.abs(currentGlucose - 90) / 3)
-      ),
-    };
+     // Calculate current risk levels using unified engine
+     const patientFeatures = buildPatientFeatures(profileData.data, vitals[0]);
+     const cvResult = calculateCardiovascularRisk(patientFeatures);
+     const diabetesResult = calculateDiabetesRisk(patientFeatures);
+     const generalResult = calculateGeneralHealthScore(patientFeatures);
+     
+     const currentRisks = {
+       cardiovascular: cvResult.riskPercentage,
+       diabetes: diabetesResult.riskPercentage,
+       general: generalResult.riskScore,
+     };
 
     // RL-based treatment optimization
     const treatments = optimizeTreatment(
@@ -512,7 +514,7 @@ Be scientifically rigorous but accessible.`;
     });
 
   } catch (error) {
-    console.error("Digital twin simulation error:", error);
+     console.error("[digital-twin] Error:", error);
     return new Response(
       JSON.stringify({ error: error instanceof Error ? error.message : "Unknown error" }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
